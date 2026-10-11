@@ -4,10 +4,10 @@
 
 Windows 任务栏按钮右键菜单里的 Jump List（「最近项目 / 工作区」）依赖系统的「显示最近使用项目」隐私设置
 （`HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackDocs`）。
-该设置一旦关闭，列表会被系统清空；Wise Care 之类的清理工具也会把它清掉。
+该设置一旦关闭，列表会被系统清空。
 
-本项目用 `ICustomDestinationList` API 手动重建 Jump List，使其在隐私设置关闭的情况下依然可用，
-并通过计划任务在锁屏/解锁时、以及被 VS Code 覆盖后自动恢复。
+本项目用 `ICustomDestinationList` API 实现手动给 Rstudio 和 Visual Studio Code 重建 Jump List，使其在隐私设置关闭的情况下依然可用，
+并通过计划任务在锁屏/解锁时自动检查，被覆盖时自动恢复。
 
 ## 核心原理
 
@@ -26,7 +26,7 @@ Windows 任务栏按钮右键菜单里的 Jump List（「最近项目 / 工作�
 
 | 文件 | 作用 |
 |---|---|
-| `JumpListTool.exe` / `.cs` | C# 封装的 `ICustomDestinationList` 工具，核心执行体 |
+| `JumpListTool.exe` / `.cs` | 底层执行工具，由上面的脚本调用，一般无需手动运行 |
 | `check_jumplist.ps1` | RStudio 刷新脚本（分类 → 失败回退任务模式） |
 | `refresh_vscode_jumplist.ps1` | VS Code 刷新脚本 + 覆盖检测 |
 | `app_list.example.txt` | RStudio 项目列表模板（复制为 `app_list.txt` 后填写，已 gitignore） |
@@ -42,18 +42,9 @@ Windows 任务栏按钮右键菜单里的 Jump List（「最近项目 / 工作�
 | `workspaces.hash` | `vscode_workspaces.txt` 的内容哈希，用于检测配置变更（已 gitignore） |
 | `jumplist.log` | 运行日志（已 gitignore） |
 
-## JumpListTool 用法
+## 编译
 
-```
-JumpListTool create      <aumid> <category> <file1> [file2] ...   加入自定义分类
-JumpListTool createtasks <aumid> <file1> [file2] ...              加入任务区
-JumpListTool createlinks <aumid> <exe> <target1> [target2] ...    shell link 任务（PKEY_Title 去扩展名；tooltip=PKEY_Description 显示项目路径；.vsremote 项自动用 wscript.exe+launch_remote.vbs）
-JumpListTool delete      <aumid>                                  删除该应用的列表
-JumpListTool setaumid    <lnk> <aumid>                             给 .lnk 写 AUMID
-JumpListTool readaumid   <lnk>                                     读 .lnk 的 AUMID
-```
-
-重新编译：
+`JumpListTool.exe` 已随仓库提供，一般无需重新编译。修改 `JumpListTool.cs` 后可用：
 
 ```powershell
 & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /out:JumpListTool.exe JumpListTool.cs
@@ -125,8 +116,7 @@ VS Code 本地项显示实际项目文件夹、远程项显示工作区 URI。
 
 ## 已知限制 / 踩坑记录
 
-- **显示名与 tooltip 自定义**：所有命令（`create` / `createtasks` / `createlinks`）都通过 `IShellLinkW` 创建条目，
-  再用 `IPropertyStore::SetValue` 设：
+- **显示名与 tooltip 自定义**：条目统一通过 `IShellLinkW` 创建，再用 `IPropertyStore::SetValue` 设：
   - `PKEY_Title`（列表里显示的名字，取文件名去扩展名，如 `SEM`、`HMCDM_FORGETTING`）
   - `PKEY_Description`（hover tooltip）：
     - RStudio → `.Rproj` 完整文件路径
