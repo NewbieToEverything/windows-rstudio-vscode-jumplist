@@ -9,6 +9,30 @@ Windows 任务栏按钮右键菜单里的 Jump List（「最近项目 / 工作�
 本项目用 `ICustomDestinationList` API 实现手动给 Rstudio 和 Visual Studio Code 重建 Jump List，使其在隐私设置关闭的情况下依然可用，
 并通过计划任务在锁屏/解锁时自动检查，被覆盖时自动恢复。
 
+## 效果示例
+
+以下截图中的项目名已做打码处理。
+
+### RStudio
+
+![RStudio Jump List](images/Rstudio.png)
+
+- 每个 `.Rproj` 成为一个条目，显示名为**项目名（去掉 `.Rproj` 后缀）**，图标取自 `.Rproj` 文件
+- **New Window**：启动一个**空白新会话**（不带任何项目），由 `launch_rstudio_new.vbs`
+  设置 `RS_INITIAL_PROJECT=none` 实现
+- 末两项（RStudio / 从任务栏取消固定 / 关闭窗口）是系统自动附加的，不可控
+
+### VS Code
+
+![VS Code Jump List](images/VS%20code.png)
+
+- 本地工作区显示名为**文件夹名**，图标为 VS Code 图标
+- 远程工作区（Dev Container）显示为自定义名称，图标为 **Docker 图标**（取自项目根目录的 `docker.ico`）
+- **New Window**：等价于 `Code.exe --new-window`，强制开新窗口而不复用上次活动窗口
+
+两个列表中，鼠标悬停在条目上会显示 tooltip：RStudio 显示 `.Rproj` 完整路径，
+VS Code 本地项显示实际项目文件夹、远程项显示工作区 URI。
+
 ## 核心原理
 
 1. **AUMID（AppUserModelID）**：Jump List 按 AUMID 归属。
@@ -81,7 +105,7 @@ powershell -ExecutionPolicy Bypass -File ".\check_jumplist.ps1"      # RStudio
 powershell -ExecutionPolicy Bypass -File ".\refresh_vscode_jumplist.ps1"  # VS Code
 ```
 
-右键任务栏图标，应能看到列表（见下方「效果示例」）。
+右键任务栏图标，应能看到列表（见上方「效果示例」）。
 
 ### 第 4 步：导入计划任务，让它自动保持
 
@@ -99,27 +123,3 @@ Jump List 会被系统和应用清空，需靠计划任务定期恢复。
 
 - **RStudio 任务**：锁屏 / 解锁后 10 秒重建列表
 - **VS Code 任务**：每分钟检查一次，VS Code 覆盖了列表就自动重建
-
-## 效果示例
-
-以下截图中的项目名已做打码处理。
-
-### RStudio
-
-![RStudio Jump List](images/Rstudio.png)
-
-- 每个 `.Rproj` 成为一个条目，显示名为**项目名（去掉 `.Rproj` 后缀）**，图标取自 `.Rproj` 文件
-- **New Window**：启动一个**空白新会话**（不带任何项目），由 `launch_rstudio_new.vbs`
-  设置 `RS_INITIAL_PROJECT=none` 实现
-- 末两项（RStudio / 从任务栏取消固定 / 关闭窗口）是系统自动附加的，不可控
-
-### VS Code
-
-![VS Code Jump List](images/VS%20code.png)
-
-- 本地工作区显示名为**文件夹名**，图标为 VS Code 图标
-- 远程工作区（Dev Container）显示为自定义名称，图标为 **Docker 图标**（取自项目根目录的 `docker.ico`）
-- **New Window**：等价于 `Code.exe --new-window`，强制开新窗口而不复用上次活动窗口
-
-两个列表中，鼠标悬停在条目上会显示 tooltip：RStudio 显示 `.Rproj` 完整路径，
-VS Code 本地项显示实际项目文件夹、远程项显示工作区 URI。
