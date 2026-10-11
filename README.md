@@ -42,44 +42,70 @@ Windows 任务栏按钮右键菜单里的 Jump List（「最近项目 / 工作�
 | `workspaces.hash` | `vscode_workspaces.txt` 的内容哈希，用于检测配置变更（已 gitignore） |
 | `jumplist.log` | 运行日志（已 gitignore） |
 
-## 编译
-
-`JumpListTool.exe` 已随仓库提供，一般无需重新编译。修改 `JumpListTool.cs` 后可用：
-
-```powershell
-& "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /out:JumpListTool.exe JumpListTool.cs
-```
-
 ## 使用
 
-本仓库不含个人配置。首次使用请从模板复制出配置文件（真实文件已在 `.gitignore` 中）：
+### 第 1 步：创建配置文件
+
+仓库不含个人配置，从模板复制两份（真实文件已在 `.gitignore` 中，不会被提交）：
 
 ```powershell
 copy app_list.example.txt app_list.txt
 copy vscode_workspaces.example.txt vscode_workspaces.txt
 ```
 
-计划任务 XML 里的 `<WorkingDirectory>` 也需改成你自己的项目目录（默认是占位符 `C:\path\to\jump-list-refresh`）。
+### 第 2 步：填入你自己的项目
 
-### RStudio
+编辑 `app_list.txt`，每行一个 `.Rproj` 路径：
 
-编辑 `app_list.txt`，每行一个 `.Rproj` 路径（`#` 为注释、空行忽略），保存后下次触发生效。手动执行：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File ".\check_jumplist.ps1"
 ```
-
-### VS Code
+D:\projects\my project\my project.Rproj
+D:\projects\another project\another project.Rproj
+```
 
 编辑 `vscode_workspaces.txt`：
 
-- **本地文件夹**：直接写路径 → 生成 `workspaces\<文件夹名>.code-workspace`
-- **远程工作区**：`vscode-remote://... |显示名` → 生成 `workspaces\<显示名>.vsremote`
+- **本地文件夹**：直接写文件夹路径
+  ```
+  D:\code\my project
+  ```
+- **远程工作区（Dev Container / SSH）**：写 `vscode-remote://... |显示名`。
+  URI 可在 VS Code 远程窗口中打开命令面板 → `Remote: Open Workspace Configuration File` 获取
+  ```
+  vscode-remote://ssh-remote+myserver/home/user/projects/myproject|myproject
+  ```
 
-手动执行：
+### 第 3 步：手动生成一次，确认可用
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File ".\refresh_vscode_jumplist.ps1"
+powershell -ExecutionPolicy Bypass -File ".\check_jumplist.ps1"      # RStudio
+powershell -ExecutionPolicy Bypass -File ".\refresh_vscode_jumplist.ps1"  # VS Code
+```
+
+右键任务栏图标，应能看到列表（见下方「效果示例」）。
+
+### 第 4 步：导入计划任务，让它自动保持
+
+Jump List 会被系统和应用清空，需靠计划任务定期恢复。
+
+> 若你的账户能以管理员身份运行命令行，任务可直接用 `schtasks` 创建；
+> 否则需手动导入（部分账户受 UAC 限制无法命令行创建）。
+
+先把两个 XML 里的 `<WorkingDirectory>` 改成你自己的项目目录（默认是占位符 `C:\path\to\jump-list-refresh`），然后：
+
+1. `Win+R` → `taskschd.msc`
+2. 右侧「导入任务」，分别选择 `JumpList-Refresh-Rstudio.xml`、`JumpList-Refresh-VSCode.xml`
+
+导入后即生效：
+
+- **RStudio 任务**：锁屏 / 解锁后 10 秒重建列表
+- **VS Code 任务**：每分钟检查一次，VS Code 覆盖了列表就自动重建
+
+### 第 5 步（可选）：重新编译
+
+`JumpListTool.exe` 已随仓库提供，一般无需重新编译。修改 `JumpListTool.cs` 后可用：
+
+```powershell
+& "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /out:JumpListTool.exe JumpListTool.cs
 ```
 
 ## 效果示例
@@ -105,14 +131,6 @@ powershell -ExecutionPolicy Bypass -File ".\refresh_vscode_jumplist.ps1"
 
 两个列表中，鼠标悬停在条目上会显示 tooltip：RStudio 显示 `.Rproj` 完整路径，
 VS Code 本地项显示实际项目文件夹、远程项显示工作区 URI。
-
-## 计划任务导入
-
-当前账户属于 Administrators 且 UAC 过滤，**无法用命令行创建任务**（`Access is denied`），
-需手动导入 `taskschd.msc`：
-
-1. `Win+R` → `taskschd.msc`
-2. 右侧「导入任务」，分别选择 `JumpList-Refresh-Rstudio.xml`、`JumpList-Refresh-VSCode.xml`
 
 ## 已知限制 / 踩坑记录
 
