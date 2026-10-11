@@ -1,0 +1,20 @@
+# VS Code 工作区列表
+# 每行一个条目：
+#   - 本地文件夹路径            -> 生成 .code-workspace
+#   - vscode-remote://... |名字 -> 生成 .vsremote（远程）
+# # 开头为注释，空行忽略
+#
+# 用法：复制本文件为 vscode_workspaces.txt，并填入你自己的工作区：
+#   copy vscode_workspaces.example.txt vscode_workspaces.txt
+
+# === 本地工作区（示例，请替换） ===
+# D:\code\my project
+
+# === 远程工作区（示例，请替换） ===
+# 获取 URI 的方法：在 VS Code 远程窗口中打开命令面板 ->
+#   "Remote: Open Workspace Configuration File"，
+# 或复制工作区地址栏中以 vscode-remote:// 开头的完整 URI。
+# 格式：vscode-remote://<authority>/<路径>|显示名
+#
+# 远程工作区示例：
+# vscode-remote://ssh-remote+myserver/home/user/projects/myproject|myproject

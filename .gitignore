@@ -1,0 +1,11 @@
+# 运行日志与自动生成内容
+*.log
+workspaces/
+workspaces.hash
+
+# 个人配置（含本机路径，不应上传；请使用 .example.txt 作为模板）
+app_list.txt
+vscode_workspaces.txt
+
+# 图标源文件（仅保留已转换的 .ico）
+docker-whale.ico

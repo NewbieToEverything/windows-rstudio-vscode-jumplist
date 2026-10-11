@@ -1,0 +1,10 @@
+# RStudio 项目列表
+# 每行一个 .Rproj 文件路径，# 开头为注释，空行忽略。
+# 最多显示前 10 个有效项目（见 check_jumplist.ps1 的 $MaxItems）。
+#
+# 用法：复制本文件为 app_list.txt，并填入你自己的项目路径：
+#   copy app_list.example.txt app_list.txt
+
+# === 示例（请替换为你的实际路径） ===
+# D:\projects\my project\my project.Rproj
+# D:\projects\another project\another project.Rproj
