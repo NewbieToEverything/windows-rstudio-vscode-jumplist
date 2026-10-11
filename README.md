@@ -100,14 +100,6 @@ Jump List 会被系统和应用清空，需靠计划任务定期恢复。
 - **RStudio 任务**：锁屏 / 解锁后 10 秒重建列表
 - **VS Code 任务**：每分钟检查一次，VS Code 覆盖了列表就自动重建
 
-### 第 5 步（可选）：重新编译
-
-`JumpListTool.exe` 已随仓库提供，一般无需重新编译。修改 `JumpListTool.cs` 后可用：
-
-```powershell
-& "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /out:JumpListTool.exe JumpListTool.cs
-```
-
 ## 效果示例
 
 以下截图中的项目名已做打码处理。
