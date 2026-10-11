@@ -91,6 +91,30 @@ powershell -ExecutionPolicy Bypass -File ".\check_jumplist.ps1"
 powershell -ExecutionPolicy Bypass -File ".\refresh_vscode_jumplist.ps1"
 ```
 
+## 效果示例
+
+以下截图中的项目名已做打码处理。
+
+### RStudio
+
+![RStudio Jump List](images/Rstudio.png)
+
+- 每个 `.Rproj` 成为一个条目，显示名为**项目名（去掉 `.Rproj` 后缀）**，图标取自 `.Rproj` 文件
+- **New Window**：启动一个**空白新会话**（不带任何项目），由 `launch_rstudio_new.vbs`
+  设置 `RS_INITIAL_PROJECT=none` 实现
+- 末两项（RStudio / 从任务栏取消固定 / 关闭窗口）是系统自动附加的，不可控
+
+### VS Code
+
+![VS Code Jump List](images/VS%20code.png)
+
+- 本地工作区显示名为**文件夹名**，图标为 VS Code 图标
+- 远程工作区（Dev Container）显示为自定义名称，图标为 **Docker 图标**（取自项目根目录的 `docker.ico`）
+- **New Window**：等价于 `Code.exe --new-window`，强制开新窗口而不复用上次活动窗口
+
+两个列表中，鼠标悬停在条目上会显示 tooltip：RStudio 显示 `.Rproj` 完整路径，
+VS Code 本地项显示实际项目文件夹、远程项显示工作区 URI。
+
 ## 计划任务导入
 
 当前账户属于 Administrators 且 UAC 过滤，**无法用命令行创建任务**（`Access is denied`），
